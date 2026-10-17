@@ -101,9 +101,10 @@ self-test does not validate the Three.js ExternalTexture material or sky path.
    partial result and exported report must clearly say it is incomplete.
 9. Try polar night, equatorial latitudes, a leap-year range, and a final partial
    interval (7 minutes over a day). Check that units and counts remain sensible.
-10. Attempt real NYC loading. Confirm the source badge says real footprints only
-    after a successful import. Disconnect the service and verify the synthetic
-    fallback remains explicit. Review missing-height counts and subset boundaries.
+10. Verify that the bundled Midtown model stays visible after startup without an
+    automatic NYC request. Explicitly load/import footprints and confirm the source
+    badge changes. Disconnect the service and verify the current scene remains
+    available. Review missing-height counts and subset boundaries.
 
 Compare 60-, 15-, 5-, and 1-minute runs and independently increase shadow/atlas
 resolutions. Thin-obstruction errors are often spatial, not temporal. Check

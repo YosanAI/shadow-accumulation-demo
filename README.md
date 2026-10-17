@@ -26,10 +26,11 @@ message. Scene selection, camera controls, preview sun, and object dragging rema
 available. Accumulation and the GPU self-test require WebGPU and are disabled in
 this preview mode; there is no WebGL computation fallback.
 
-The initial scene is Manhattan, initially using an explicitly labelled synthetic
-fallback. A bounded request attempts to replace it with a real NYC OTI footprint
-subset. No verified NYC dataset is included in this distribution. Failure does
-not prevent use of the synthetic demo. Import GeoJSON is also provided.
+The initial Manhattan scene is the locally bundled model supplied in
+`manhattan-block-viewer.html`: 573 buildings across 35 Midtown tax blocks,
+including 527 historical survey meshes. It loads without a data request and is
+not automatically replaced. The NYC footprint download and GeoJSON import
+buttons remain available for explicitly selecting a different dataset.
 
 Start with the default one-day, 15-minute bake. Expand **Resolution & engine
 settings → Run GPU self-test** to run an analytic device-side check before a
@@ -54,9 +55,8 @@ npm run preview
 
 `dist/index.html` is postprocessed to inline Vite's JavaScript and CSS. The build
 keeps intermediate assets for inspection; the HTML itself is intended to be
-self-contained. The optional live NYC request still requires a network; its
-fallback does not. **The Vite/npm build was not executable in the restricted
-creation environment, so this offline-build path is supplied but unverified.**
+self-contained. The bundled scenes do not require a data request. The optional
+live NYC footprint download still requires a network.
 
 To rebuild the supplied CDN-based HTML without installing anything:
 
@@ -68,7 +68,7 @@ npm run build:cdn
 
 | Tab | Geometry | Heatmap receivers | Interaction |
 |---|---|---|---|
-| Manhattan | Synthetic rotated city; automatic best-effort NYC OTI loader or imported WGS84 GeoJSON | Building roofs, façades, ground; all registered city mesh surfaces | Orbit, pan, zoom; load/import real data |
+| Manhattan | Supplied Midtown model: 573 buildings, historical survey roof details, streets, sidewalks, Bryant Park and plazas; minimum 2048² atlas | Building roofs and façades, streets, sidewalks and ground; buried bases excluded | Orbit, pan, zoom; optionally replace with downloaded/imported footprints |
 | Residential | Supplied residential-area model: 18 houses with hip and gable roofs, curved streets, driveways, roof equipment, 24 trees | Roof slopes only | Drag subtly ringed trees |
 | Terrain | Procedural mountain/valley heightfield, 128 × 128 cells (32,768 triangles); minimum 1024² surface atlas selected automatically | Entire terrain surface | Orbit to inspect self-shadowed valleys |
 | Solar panels | 66 fixed panels in three concentric rings, varying azimuths | Front faces only | Drag two trees, a block, a cylinder, a wall, and a cone |
@@ -142,6 +142,8 @@ src/
   demos/
     common.js                   # Small geometry helpers, opaque trees, drag hints
     manhattan.js
+    manhattan-model.js          # Supplied Midtown geometry construction
+    manhattan-data.js           # Bundled footprints, survey meshes, context and provenance
     residential.js
     residential-model.js        # Supplied residential scene construction
     residential-data.js         # Building footprints, roof skeletons, site layout

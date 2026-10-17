@@ -220,29 +220,42 @@ CPU accumulation and color-image readback. No f16, subgroups, atomics, or
 experimental feature is required merely for novelty. Timestamp queries are
 feature-detected and report the last batch, not a complete application benchmark.
 
-## 7. Manhattan data provenance and the honest fallback
+## 7. Manhattan data provenance and optional footprint imports
 
-The startup scene is a procedural, rotated, Manhattan-inspired city. A bounded
-request attempts to load NYC OTI Building Footprints for a small Midtown study
-area near latitude 40.751, longitude −73.986. The service query requests up to
-180 features. An imported WGS84 GeoJSON can contain up to 500 processed features.
-The importer supports Polygon/MultiPolygon rings and holes.
+The startup scene uses the supplied `manhattan-block-viewer.html` model data:
+573 buildings across 35 Midtown tax blocks, with 527 historical 2014 survey
+meshes and 46 footprint extrusions. Streets, sidewalks, Bryant Park and plazas
+are included. Its local coordinates use metres, east/up/south axes, and an origin
+at latitude 40.7533, longitude −73.9873. Source dates, identifiers, references and
+limitations remain in the bundled metadata and exported reports. Building ground
+is flattened; historical roof details are not a current as-built survey.
 
-Coordinates are projected into a local metre-scale tangent-plane approximation.
+The source geometry is batched by material and shadow/receiver flags, retaining
+all 160,346 triangles while reducing 1,738 meshes to 22 rendering batches. The
+architectural edge lines are retained. Roofs, façades and context surfaces receive
+the heatmap; buried base faces are excluded. Its 134,881 receiving triangles need
+a minimum 2048² atlas. The camera and sun use the application's existing viewer.
+
+Startup does not request or automatically replace the bundled scene. The
+explicit NYC download button requests up to 180 footprint features near latitude
+40.751, longitude −73.986. An imported WGS84 GeoJSON can contain up to 500
+processed features. The importer supports Polygon/MultiPolygon rings and holes.
+
+For those optional footprint imports, coordinates are projected into a local
+metre-scale tangent-plane approximation.
 The official `HEIGHT_ROOF` / `HEIGHTROOF` values are treated as feet and converted
 by 0.3048. Generic imported `height` is treated as metres. Missing heights become
 15 m and are counted prominently in source metadata. For quantitative use,
 verify the current service schema and height units against the source.
 
-The geometry is a footprint extrusion. Ground elevation is flattened; terraces,
+The imported geometry is a footprint extrusion. Ground elevation is flattened; terraces,
 setbacks, actual roof slopes, detailed mechanical equipment, trees, and buildings
 outside the requested subset are not reconstructed. Boundary buildings can
 therefore receive too much sun. This is not a detailed Manhattan digital twin.
 
-No verified NYC dataset could be downloaded in the creation environment. The
-repository therefore includes the loader, provenance reporting, import route,
-and a labelled fallback, but does not falsely claim the distributed procedural
-city is real geospatial data. A failed live request leaves a usable scene.
+A failed live request leaves the current scene available. The bundled model is
+independent of that service; the full embedded source provenance can be found in
+`src/demos/manhattan-data.js`.
 
 Official source references:
 

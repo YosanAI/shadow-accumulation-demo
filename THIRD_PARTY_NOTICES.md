@@ -59,19 +59,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Source: https://github.com/mourner/suncalc/blob/v1.9.0/suncalc.js
 
-## NYC building data — optional live request, not a bundled surveyed asset
+## NYC model data — bundled supplied model and optional live requests
 
-Provider: New York City Office of Technology and Innovation (OTI).
-Dataset: Building Footprints / BUILDING. Usage is governed by NYC Open Data
-terms. Source attribution is shown in the viewport and exported reports.
+The model supplied in `manhattan-block-viewer.html` is embedded in
+`src/demos/manhattan-data.js`. Its metadata attributes footprints to NYC OTI,
+historical 2014 survey geometry to NYC DCP/OTI's NYC 3D Model, and context to NYC
+tax-block, PLUTO, street-centerline, planimetric sidewalk/public-plaza and Parks
+datasets. Source references, dates, height overrides and model limitations are
+preserved in that module and exported reports. Colors and some surface treatments
+are presentational; ground is flattened and the survey is historical.
+
+The optional live loader uses NYC OTI Building Footprints / BUILDING. Usage is
+governed by NYC Open Data terms. Source attribution is shown in the viewport and
+exported reports.
 
 Metadata: https://github.com/CityOfNewYork/nyc-geo-metadata/blob/main/Metadata/Metadata_BuildingFootprints.md
 Terms: https://opendata.cityofnewyork.us/overview/#termsofuse
 Service: https://services6.arcgis.com/yG5s3afENB5iO9fj/arcgis/rest/services/BUILDING_view/FeatureServer
 
-The distribution does NOT contain a verified download of this dataset. The
-live query is best-effort. If it fails, the procedural city is visibly labelled
-"Manhattan-inspired fallback". It must not be described as real Manhattan data.
+Survey dataset: https://data.nyc.gov/City-Government/NYC-3D-Model-by-Community-District/u5j4-zxpn
+Survey metadata: https://github.com/CityOfNewYork/nyc-geo-metadata/blob/main/Metadata/Metadata_3DBuildingModel.md
+
+The bundled model's provenance is supplied with the attachment. The optional
+live query is independent and does not run automatically on startup.
 
 ## Development dependency
 

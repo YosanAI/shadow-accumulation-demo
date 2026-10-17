@@ -6,14 +6,14 @@ import { buildSunSamples, validateSolarConfig } from '#lab/core/solar.js';
 import { snapshotSurfaces } from '#lab/adapters/three-surfaces.js';
 import { HeatmapLayer } from '#lab/adapters/heatmap-layer.js';
 import { Viewer } from '#lab/ui/viewer.js';
-import { createManhattanFallback, fetchNYCBuildings, createManhattanFromGeoJSON } from '#lab/demos/manhattan.js';
+import { createManhattan, fetchNYCBuildings, createManhattanFromGeoJSON } from '#lab/demos/manhattan.js';
 import { createResidential } from '#lab/demos/residential.js';
 import { createTerrain } from '#lab/demos/terrain.js';
 import { createSolarPanels } from '#lab/demos/solar-panels.js';
 const element = id => document.getElementById(id);
 const number = id => Number(element(id).value);
 const sceneNames = { manhattan: 'Manhattan', residential: 'Residential roofs', terrain: 'Mountain terrain', panels: 'Concentric solar panels' };
-const factories = { manhattan: createManhattanFallback, residential: createResidential, terrain: createTerrain, panels: createSolarPanels };
+const factories = { manhattan: createManhattan, residential: createResidential, terrain: createTerrain, panels: createSolarPanels };
 let device, renderer, viewer, demo, engine, snapshot, heatmap;
 let webgpuUnavailableReason = '';
 let controller = null, running = null, lastStats = null, report = null, resultState = 'empty';
@@ -259,7 +259,7 @@ async function loadNYC() {
     }
     catch (error) {
         nycData = null;
-        element('data-status').textContent = `Live data unavailable (${error.name === 'AbortError' ? 'request timed out' : error.message}). The synthetic fallback is still usable. Import a downloaded NYC GeoJSON to use real data.`;
+        element('data-status').textContent = `Live data unavailable (${error.name === 'AbortError' ? 'request timed out' : error.message}). The current scene remains available. You can also import a downloaded NYC GeoJSON.`;
     }
     finally {
         clearTimeout(timeout);
@@ -412,7 +412,5 @@ async function initialize() {
         ? `WebGPU · Three r${THREE.REVISION}${device.features.has('timestamp-query') ? ' · GPU timers' : ''}`
         : `WebGL 2 · scene preview only · Three r${THREE.REVISION}`;
     switchScene('manhattan');
-    // Best-effort data upgrade. A bounded request cannot prevent scene use.
-    loadNYC();
 }
 initialize().catch(fatal);

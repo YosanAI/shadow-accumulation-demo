@@ -91,10 +91,10 @@
   </details>
   <details id="manhattan-data">
     <summary>Manhattan data &amp; attribution</summary>
-    <p class="note">The app tries NYC OTI’s public footprint service. If unavailable, the scene remains clearly labelled synthetic. Real footprints are extruded to roof heights, not photorealistic building assets.</p>
+    <p class="note">The supplied Midtown model is bundled locally: 573 buildings, including 527 historical 2014 survey meshes, plus streets, sidewalks and Bryant Park. Ground is flattened; unmatched buildings use published-height extrusions. Use the buttons below to replace it with a different footprint dataset.</p>
     <div class="small-actions"><button id="load-nyc" data-bake-input>Load NYC footprints</button><button id="import-geojson" data-bake-input>Import GeoJSON</button></div>
     <input id="geojson-file" type="file" accept=".json,.geojson,application/json" hidden>
-    <p id="data-status" class="note">No map tiles are used.</p>
+    <p id="data-status" class="note">The bundled model loads without a data request. No map tiles are used.</p>
   </details>
 </aside>
 <section id="view-region" aria-label="Interactive 3D viewport">
