@@ -1,5 +1,18 @@
 # Verification record and target-device checklist
 
+## WebGL preview fallback verification
+
+Headless Chrome rendered all four scenes with WebGPU unavailable. The WebGL 2
+badge, visible error with its icon on the left, and disabled Generate / GPU
+self-test controls were checked after scene switches. The extended interaction
+check stopped before verifying preview-sun and camera controls.
+
+Isolated startup checks cover insecure contexts, a missing WebGPU API, a null
+adapter, rejected adapter/device requests, renderer fallback, and successful
+WebGPU device selection. They verify that preview mode never starts calculations
+and that WebGPU mode passes its device to the renderer. These checks do not
+execute WebGPU shaders. The 16 CPU tests, Vite build, and CDN packager passed.
+
 ## Executed in the creation environment
 
 `npm test` / `node --test tests/*.test.js`: **16/16 passed**.
@@ -53,7 +66,12 @@ self-test does not validate the Three.js ExternalTexture material or sky path.
 ## Manual browser acceptance tests
 
 1. Confirm the backend badge says WebGPU. Run the GPU self-test and inspect the
-   browser console for shader/validation errors. No WebGL fallback is intended.
+   browser console for shader/validation errors.
+   With WebGPU unavailable (including a missing API, a null adapter, or a failed
+   device request), confirm the badge says WebGL 2 and all four scenes render.
+   The error box must retain its icon on the left and explain that calculations
+   require WebGPU. Generate and GPU self-test must stay disabled after scene
+   changes; camera controls, preview sun, and dragging must still work.
 2. Generate a one-day Manhattan heatmap. Orbit around a building; roof and wall
    colors must remain attached to their surfaces and independent of the camera.
 3. Change the preview time toward sunrise/sunset. Sky/sun/live shadows should

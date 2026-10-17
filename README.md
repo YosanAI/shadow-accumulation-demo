@@ -21,6 +21,11 @@ Some browsers permit WebGPU on `file://`, but localhost is more predictable.
 Opening an HTML attachment inside a chat preview is not a WebGPU compatibility
 test. A phone needs a secure context; a plain HTTP LAN-IP URL is usually not one.
 
+If WebGPU is unavailable, the scenes render using WebGL 2 with a visible error
+message. Scene selection, camera controls, preview sun, and object dragging remain
+available. Accumulation and the GPU self-test require WebGPU and are disabled in
+this preview mode; there is no WebGL computation fallback.
+
 The initial scene is Manhattan, initially using an explicitly labelled synthetic
 fallback. A bounded request attempts to replace it with a real NYC OTI footprint
 subset. No verified NYC dataset is included in this distribution. Failure does

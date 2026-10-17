@@ -203,6 +203,11 @@ engine uses that same device. `THREE.ExternalTexture` wraps the raw color atlas,
 which a `MeshBasicNodeMaterial` samples using `uv1`. This uses the public external-
 texture API instead of private renderer backend texture handles.
 
+If WebGPU cannot initialize, Three.js uses its WebGL 2 backend for scene preview.
+The application shows an error and disables accumulation and the GPU self-test.
+Computations still require WebGPU and its shared device; the WebGL preview never
+receives the engine's GPU textures or runs its compute passes.
+
 The texture contains the sRGB blue → cyan → green → yellow → red palette. It is
 marked sRGB, sampled without vertical flipping, and displayed without tone
 mapping. At opacity 100% the current preview sun cannot darken or shift the

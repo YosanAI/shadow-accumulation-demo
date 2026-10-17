@@ -15,13 +15,17 @@ const number = id => Number(element(id).value);
 const sceneNames = { manhattan: 'Manhattan', residential: 'Residential roofs', terrain: 'Mountain terrain', panels: 'Concentric solar panels' };
 const factories = { manhattan: createManhattanFallback, residential: createResidential, terrain: createTerrain, panels: createSolarPanels };
 let device, renderer, viewer, demo, engine, snapshot, heatmap;
+let webgpuUnavailableReason = '';
 let controller = null, running = null, lastStats = null, report = null, resultState = 'empty';
 let nycData = null, loadingNYC = false, sceneVersion = 0;
+function showError(message) {
+    element('fatal-message').textContent = message;
+    element('fatal').hidden = false;
+}
 function fatal(error) {
     console.error(error);
     controller?.abort();
-    element('fatal').hidden = false;
-    element('fatal').textContent = `${error.message ?? error}\n\nThis experiment requires a working WebGPU adapter and HTTPS or localhost. It deliberately does not fall back to WebGL. A downloaded HTML file still needs internet to load its pinned Three.js modules.`;
+    showError(String(error.message ?? error));
     element('status').textContent = 'Unable to continue. See the error above.';
 }
 function status(message, progress) {
@@ -37,6 +41,7 @@ function setBusy(busy) {
     for (const input of document.querySelectorAll('[data-bake-input], [data-scene]'))
         input.disabled = busy;
     element('generate').disabled = busy || !device;
+    element('gpu-self-test').disabled = busy || !device;
     element('cancel').disabled = !busy;
     element('clear').disabled = busy || !engine;
     element('export-report').disabled = busy || !report || resultState === 'stale';
@@ -107,7 +112,7 @@ function clearResult() {
     lastStats = null;
     report = null;
     resultState = 'empty';
-    element('statistics').textContent = 'Generate to see area-weighted results.';
+    element('statistics').textContent = device ? 'Generate to see area-weighted results.' : 'WebGPU support is required to compute accumulation.';
     element('show-heatmap').disabled = true;
     element('export-report').disabled = true;
     element('clear').disabled = true;
@@ -150,11 +155,15 @@ function switchScene(id) {
     updateSun();
     estimate();
     setBusy(false);
-    status('Ready. Set a period, then generate accumulation.', 0);
+    status(device ? 'Ready. Set a period, then generate accumulation.' : 'Scene preview ready. WebGPU is required to generate accumulation.', 0);
 }
 async function generate() {
     if (running)
         return;
+    if (!device) {
+        status('WebGPU support is required to generate accumulation. You can still explore the scenes.');
+        return;
+    }
     try {
         validateSolarConfig(config());
     }
@@ -359,28 +368,49 @@ async function initialize() {
     wireUI();
     estimate();
     updateLegend();
-    if (!globalThis.isSecureContext || !navigator.gpu)
-        throw new Error('WebGPU is not exposed in this browser/context. Open the page on localhost or HTTPS in a browser with a supported GPU.');
-    const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
-    if (!adapter)
-        throw new Error('No WebGPU adapter was available. Check hardware acceleration, drivers, and browser GPU support.');
-    const optional = ['timestamp-query', 'core-features-and-limits'].filter(feature => adapter.features.has(feature));
-    device = await adapter.requestDevice({ requiredFeatures: optional });
-    renderer = new THREE.WebGPURenderer({ device, antialias: true, alpha: false });
+    try {
+        if (!globalThis.isSecureContext)
+            throw new Error('WebGPU requires HTTPS or localhost on this device. An HTTP connection to another computer does not qualify.');
+        if (!navigator.gpu)
+            throw new Error('WebGPU is not exposed in this browser. Use a browser with WebGPU support.');
+        const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+        if (!adapter)
+            throw new Error('No WebGPU adapter was available. Check hardware acceleration, drivers, and browser GPU support.');
+        const optional = ['timestamp-query', 'core-features-and-limits'].filter(feature => adapter.features.has(feature));
+        device = await adapter.requestDevice({ requiredFeatures: optional });
+    }
+    catch (error) {
+        webgpuUnavailableReason = String(error.message ?? error);
+    }
+    renderer = new THREE.WebGPURenderer({ ...(device ? { device } : { forceWebGL: true }), antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.7;
     await renderer.init();
-    if (!renderer.backend.isWebGPUBackend)
-        throw new Error('The renderer did not initialize its WebGPU backend. WebGL fallback is disabled by this app.');
+    if (!renderer.backend.isWebGPUBackend) {
+        // The heatmap uses ExternalTexture and must share the renderer's GPUDevice.
+        // If Three.js fell back during initialization, keep this a scene preview.
+        device?.destroy();
+        device = null;
+        webgpuUnavailableReason ||= 'The WebGPU renderer could not initialize.';
+        showError(`WebGPU support is required for accumulation calculations and the GPU self-test. You can still explore the scenes using WebGL.\n\n${webgpuUnavailableReason}`);
+        element('gpu-test-result').textContent = 'The GPU self-test requires WebGPU support.';
+    }
     renderer.onError = information => fatal(new Error(information.message ?? 'WebGPU validation error'));
-    device.lost.then(information => { if (information.reason !== 'destroyed')
-        fatal(new Error(`GPU device lost: ${information.message}`)); });
+    device?.lost.then(information => {
+        if (information.reason !== 'destroyed') {
+            device = null;
+            setBusy(Boolean(running));
+            fatal(new Error(`GPU device lost: ${information.message}`));
+        }
+    });
     element('canvas-host').append(renderer.domElement);
     viewer = new Viewer(renderer, element('canvas-host'), () => invalidate('An obstruction moved. The old bake is hidden; generate again.'), fatal);
-    element('gpu-badge').textContent = `WebGPU · Three r${THREE.REVISION}${optional.includes('timestamp-query') ? ' · GPU timers' : ''}`;
+    element('gpu-badge').textContent = device
+        ? `WebGPU · Three r${THREE.REVISION}${device.features.has('timestamp-query') ? ' · GPU timers' : ''}`
+        : `WebGL 2 · scene preview only · Three r${THREE.REVISION}`;
     switchScene('manhattan');
     // Best-effort data upgrade. A bounded request cannot prevent scene use.
     loadNYC();

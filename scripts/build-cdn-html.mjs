@@ -29,7 +29,7 @@ for(const [name,source] of Object.entries(sources))imports[name]=URL.createObjec
 const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports});document.head.append(map);
 import('#lab/main.js').catch(error=>{
   console.error(error);const banner=document.getElementById('fatal');banner.hidden=false;
-  banner.textContent='Unable to load the demo: '+error.message+'\\nThis single-HTML edition needs internet access to its pinned Three.js CDN. Serve it on localhost or HTTPS for WebGPU. The Vite build can bundle Three.js for offline use.';
+  document.getElementById('fatal-message').textContent='Unable to load the demo: '+error.message+'\\nThis single-HTML edition needs internet access to its pinned Three.js CDN. Serve it on localhost or HTTPS for WebGPU calculations. The Vite build can bundle Three.js for offline use.';
   document.getElementById('status').textContent='The demo could not initialize.';
 });
 </script>`;

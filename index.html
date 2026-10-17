@@ -8,7 +8,7 @@
 <body>
 <header>
   <div><h1>Shadow accumulation lab</h1><p>A surface-space sunlight experiment · Three.js + WebGPU</p></div>
-  <span id="gpu-badge">Starting WebGPU…</span>
+  <span id="gpu-badge">Starting renderer…</span>
 </header>
 <nav id="tabs" aria-label="Demo scene">
   <button data-scene="manhattan" aria-pressed="true">Manhattan</button>
@@ -16,7 +16,10 @@
   <button data-scene="terrain" aria-pressed="false">Terrain</button>
   <button data-scene="panels" aria-pressed="false">Solar panels</button>
 </nav>
-<div id="fatal" role="alert" hidden></div>
+<div id="fatal" role="alert" hidden>
+  <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v6m0 3v1"/></svg>
+  <div id="fatal-message"></div>
+</div>
 <main>
 <aside id="sidebar">
   <details open>
