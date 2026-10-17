@@ -142,6 +142,11 @@ function switchScene(id) {
     element('interaction-hint').textContent = `Drag to orbit · wheel/pinch to zoom · right-drag to pan${demo.draggables.length ? ' · drag ringed objects to move them' : ''}`;
     if (id === 'manhattan' && demo.source.kind === 'nyc')
         element('atlas-size').value = '1024';
+    const minAtlasSize = demo.minAtlasSize ?? 512;
+    for (const option of element('atlas-size').options)
+        option.disabled = Number(option.value) < minAtlasSize;
+    if (number('atlas-size') < minAtlasSize)
+        element('atlas-size').value = String(minAtlasSize);
     updateSun();
     estimate();
     setBusy(false);

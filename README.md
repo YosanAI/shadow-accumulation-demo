@@ -65,7 +65,7 @@ npm run build:cdn
 |---|---|---|---|
 | Manhattan | Synthetic rotated city; automatic best-effort NYC OTI loader or imported WGS84 GeoJSON | Building roofs, façades, ground; all registered city mesh surfaces | Orbit, pan, zoom; load/import real data |
 | Residential | Six differently oriented gabled houses, oblique roads, chimneys, vents, rooftop equipment, trees | Roof slopes only | Drag subtly ringed trees |
-| Terrain | Procedural mountain/valley heightfield, 40 × 40 cells | Entire terrain surface | Orbit to inspect self-shadowed valleys |
+| Terrain | Procedural mountain/valley heightfield, 128 × 128 cells (32,768 triangles); minimum 1024² surface atlas selected automatically | Entire terrain surface | Orbit to inspect self-shadowed valleys |
 | Solar panels | 66 fixed panels in three concentric rings, varying azimuths | Front faces only | Drag two trees, a block, a cylinder, a wall, and a cone |
 
 Every scene registers receivers and casters independently. A non-receiving

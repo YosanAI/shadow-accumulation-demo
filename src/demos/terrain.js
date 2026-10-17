@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { mesh, material } from '#lab/demos/common.js';
+const TERRAIN_SEGMENTS = 128;
 function heightAt(x, z) {
     const peak = (cx, cz, amplitude, width) => amplitude * Math.exp(-((x - cx) ** 2 + (z - cz) ** 2) / (width * width));
     let height = 4 + peak(-45, -30, 65, 29) + peak(30, -38, 48, 26) + peak(8, 37, 51, 31) + peak(68, 26, 25, 21);
@@ -9,7 +10,7 @@ function heightAt(x, z) {
 }
 export function createTerrain() {
     const root = new THREE.Group();
-    const geometry = new THREE.PlaneGeometry(210, 210, 40, 40);
+    const geometry = new THREE.PlaneGeometry(210, 210, TERRAIN_SEGMENTS, TERRAIN_SEGMENTS);
     geometry.rotateX(-Math.PI / 2);
     const positions = geometry.attributes.position;
     const colors = [];
@@ -23,5 +24,6 @@ export function createTerrain() {
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
     geometry.computeVertexNormals();
     root.add(mesh(geometry, material(0xffffff, { vertexColors: true }), { receiver: true, name: 'Self-shadowing mountain terrain' }));
-    return { id: 'terrain', root, extent: 210, camera: [185, 160, 215], target: [0, 18, 0], draggables: [], source: { kind: 'procedural', description: 'Synthetic 40 × 40-cell mountain heightfield • geometric normals used for integration' }, description: 'All of the terrain surface receives the heatmap, including its self-shadowed valleys.' };
+    // Each triangle needs its own padded atlas chart; this mesh cannot fit 512².
+    return { id: 'terrain', root, extent: 210, camera: [185, 160, 215], target: [0, 18, 0], draggables: [], minAtlasSize: 1024, source: { kind: 'procedural', description: `Synthetic ${TERRAIN_SEGMENTS} × ${TERRAIN_SEGMENTS}-cell mountain heightfield • geometric normals used for integration` }, description: 'All of the terrain surface receives the heatmap, including its self-shadowed valleys.' };
 }
