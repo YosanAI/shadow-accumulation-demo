@@ -69,7 +69,7 @@ npm run build:cdn
 | Tab | Geometry | Heatmap receivers | Interaction |
 |---|---|---|---|
 | Manhattan | Synthetic rotated city; automatic best-effort NYC OTI loader or imported WGS84 GeoJSON | Building roofs, façades, ground; all registered city mesh surfaces | Orbit, pan, zoom; load/import real data |
-| Residential | Six differently oriented gabled houses, oblique roads, chimneys, vents, rooftop equipment, trees | Roof slopes only | Drag subtly ringed trees |
+| Residential | Supplied residential-area model: 18 houses with hip and gable roofs, curved streets, driveways, roof equipment, 24 trees | Roof slopes only | Drag subtly ringed trees |
 | Terrain | Procedural mountain/valley heightfield, 128 × 128 cells (32,768 triangles); minimum 1024² surface atlas selected automatically | Entire terrain surface | Orbit to inspect self-shadowed valleys |
 | Solar panels | 66 fixed panels in three concentric rings, varying azimuths | Front faces only | Drag two trees, a block, a cylinder, a wall, and a cone |
 
@@ -143,6 +143,8 @@ src/
     common.js                   # Small geometry helpers, opaque trees, drag hints
     manhattan.js
     residential.js
+    residential-model.js        # Supplied residential scene construction
+    residential-data.js         # Building footprints, roof skeletons, site layout
     terrain.js
     solar-panels.js
   ui/
