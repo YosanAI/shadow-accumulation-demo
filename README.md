@@ -73,7 +73,7 @@ npm run build:cdn
 | Manhattan | Supplied Midtown model: 573 buildings, historical survey roof details, streets, sidewalks, Bryant Park and plazas; minimum 2048² atlas | Building roofs and façades, streets, sidewalks and ground; buried bases excluded | Orbit, pan, zoom |
 | Residential | Supplied residential-area model: 18 houses with hip and gable roofs, curved streets, driveways, roof equipment, 24 trees | Roof slopes only | Drag subtly ringed trees |
 | Terrain | Procedural mountain/valley heightfield, 128 × 128 cells (32,768 triangles); minimum 1024² surface atlas selected automatically | Entire terrain surface | Orbit to inspect self-shadowed valleys |
-| Solar panels | 66 fixed panels in three concentric rings, varying azimuths | Front faces only | Drag two trees, a block, a cylinder, a wall, and a cone |
+| Solar panels | 66 fixed portrait panels in three concentric rings, varying azimuths | Front faces only | Drag two trees, a block, a cylinder, a wall, and a cone |
 
 Every scene registers receivers and casters independently. A non-receiving
 chimney, tree, panel frame, or wall still casts a shadow on receiving surfaces.

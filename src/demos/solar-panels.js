@@ -2,23 +2,23 @@ import * as THREE from 'three/webgpu';
 import { ground, box, mesh, material, tree, addDragHint } from '#lab/demos/common.js';
 function cellTexture() {
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 128;
+    canvas.width = 128;
+    canvas.height = 256;
     const context = canvas.getContext('2d');
     context.fillStyle = '#193a59';
-    context.fillRect(0, 0, 256, 128);
+    context.fillRect(0, 0, canvas.width, canvas.height);
     context.strokeStyle = '#7290a5';
     context.lineWidth = 1;
-    for (let x = 0; x <= 256; x += 32) {
+    for (let x = 0; x <= canvas.width; x += 32) {
         context.beginPath();
         context.moveTo(x, 0);
-        context.lineTo(x, 128);
+        context.lineTo(x, canvas.height);
         context.stroke();
     }
-    for (let y = 0; y <= 128; y += 32) {
+    for (let y = 0; y <= canvas.height; y += 32) {
         context.beginPath();
         context.moveTo(0, y);
-        context.lineTo(256, y);
+        context.lineTo(canvas.width, y);
         context.stroke();
     }
     const texture = new THREE.CanvasTexture(canvas);
@@ -38,13 +38,13 @@ export function createSolarPanels() {
             group.position.set(Math.sin(angle) * radius, 0, Math.cos(angle) * radius);
             group.rotation.y = angle;
             root.add(group);
-            const backing = box(group, [4.4, 2.7, 0.12], [0, elevation, 0], 0xaab3b6, { name: 'Panel back and frame — not a receiver' });
+            const backing = box(group, [2.7, 4.4, 0.12], [0, elevation, 0], 0xaab3b6, { name: 'Panel back and frame — not a receiver' });
             backing.rotation.x = -Math.PI / 2 + 0.46;
-            const front = mesh(new THREE.PlaneGeometry(4.16, 2.46), frontMaterial, { receiver: true, name: `Panel front, ring ${ring + 1}, panel ${i + 1}` });
+            const front = mesh(new THREE.PlaneGeometry(2.46, 4.16), frontMaterial, { receiver: true, name: `Panel front, ring ${ring + 1}, panel ${i + 1}` });
             front.rotation.copy(backing.rotation);
             front.position.copy(backing.position).add(new THREE.Vector3(0, Math.cos(0.46), Math.sin(0.46)).multiplyScalar(0.075));
             group.add(front);
-            for (const x of [-1.4, 1.4])
+            for (const x of [-0.85, 0.85])
                 box(group, [0.12, elevation, 0.12], [x, elevation / 2, 0], 0x7b8488, { name: 'Panel support' });
         }
     }
@@ -78,5 +78,5 @@ export function createSolarPanels() {
     coneGroup.add(cone);
     addDragHint(coneGroup, 3.4);
     draggables.push(coneGroup);
-    return { id: 'panels', root, extent: 100, camera: [82, 74, 100], target: [0, 1, 0], draggables, source: { kind: 'procedural', description: '66 fixed panels • three concentric rings • six draggable obstructions' }, description: 'Only panel front faces receive the heatmap. Ring azimuths vary deliberately; panels do not track the sun.' };
+    return { id: 'panels', root, extent: 100, camera: [82, 74, 100], target: [0, 1, 0], draggables, source: { kind: 'procedural', description: '66 fixed portrait panels • three concentric rings • six draggable obstructions' }, description: 'Only panel front faces receive the heatmap. Ring azimuths vary deliberately; panels do not track the sun.' };
 }

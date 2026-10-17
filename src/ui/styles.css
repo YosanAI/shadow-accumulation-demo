@@ -56,6 +56,10 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .fullscreen-button:hover:not(:disabled) { background: white; color: #155eef; border-color: #155eef; }
 .fullscreen-button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #view-region:fullscreen { width: 100%; height: 100%; min-height: 0; }
+#creator-watermark { position: absolute; z-index: 2; left: max(16px, env(safe-area-inset-left)); bottom: max(14px, env(safe-area-inset-bottom)); padding: 6px 9px; border-radius: 6px; background: #ffffffe0; color: #43556c; font-size: 11px; text-decoration: none; }
+#creator-watermark span { font-weight: 700; }
+#creator-watermark:hover { color: #155eef; text-decoration: underline; }
+#creator-watermark:focus-visible { outline: 3px solid #1465cf; outline-offset: 3px; }
 #compass { position: absolute; right: 16px; top: 15px; width: 92px; height: 112px; pointer-events: none; }
 #compass-rose { position: relative; width: 92px; height: 92px; background: rgba(255,255,255,.94); border: 1px solid #b8c2c9; border-radius: 50%; }
 #compass-rose span, #compass-rose b { position: absolute; font-size: 12px; }
