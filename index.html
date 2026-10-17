@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGPU Shadow Accumulation Lab</title>
+  <link rel="stylesheet" href="/src/ui/styles.css">
+</head>
+<body>
+<header>
+  <div><h1>Shadow accumulation lab</h1><p>A surface-space sunlight experiment · Three.js + WebGPU</p></div>
+  <span id="gpu-badge">Starting WebGPU…</span>
+</header>
+<nav id="tabs" aria-label="Demo scene">
+  <button data-scene="manhattan" aria-pressed="true">Manhattan</button>
+  <button data-scene="residential" aria-pressed="false">Residential</button>
+  <button data-scene="terrain" aria-pressed="false">Terrain</button>
+  <button data-scene="panels" aria-pressed="false">Solar panels</button>
+</nav>
+<div id="fatal" role="alert" hidden></div>
+<main>
+<aside id="sidebar">
+  <details open>
+    <summary>Sun &amp; accumulation period</summary>
+    <div class="two-columns">
+      <label>Latitude <input id="latitude" data-bake-input type="number" min="-90" max="90" step="0.0001" value="40.751"></label>
+      <label>Longitude <input id="longitude" data-bake-input type="number" min="-180" max="180" step="0.0001" value="-73.986"></label>
+    </div>
+    <p class="note">Coordinates move the sun, not the ground or buildings. North is −Z; east is +X.</p>
+    <div class="two-columns">
+      <label>Start date · UTC <input id="start-date" data-bake-input type="date" value="2026-06-21"></label>
+      <label>End date · UTC <input id="end-date" data-bake-input type="date" value="2026-06-21"></label>
+    </div>
+    <div class="small-actions"><button data-period="day" data-bake-input>Day</button><button data-period="month" data-bake-input>Month</button><button data-period="year" data-bake-input>Full year</button></div>
+    <label for="interval">Sampling interval <output id="interval-output">15 min</output></label>
+    <input id="interval" data-bake-input type="range" min="1" max="120" step="1" value="15" list="interval-ticks">
+    <datalist id="interval-ticks"><option value="1"></option><option value="15"></option><option value="30"></option><option value="60"></option><option value="120"></option></datalist>
+    <p class="note">Both dates are included. Samples are evaluated at interval midpoints. Night-time samples are skipped.</p>
+    <p id="sample-estimate" class="readout">—</p>
+  </details>
+  <div class="generate-actions">
+    <button id="generate" class="primary" disabled>Generate accumulation</button>
+    <button id="cancel" disabled>Cancel</button>
+  </div>
+  <progress id="progress" max="1" value="0" aria-label="Accumulation progress"></progress>
+  <p id="status" role="status" aria-live="polite">Loading the scene…</p>
+  <details open>
+    <summary>Heatmap</summary>
+    <label>Measurement
+      <select id="metric"><option value="energy">Direct energy · incidence weighted</option><option value="hours">Sunlit time · no irradiance weighting</option></select>
+    </label>
+    <label>Color scale
+      <select id="normalization"><option value="access">Relative · fraction of unshaded potential</option><option value="range">Relative · this scene’s min–max</option><option value="absolute">Absolute · fixed units and ceiling</option></select>
+    </label>
+    <label id="absolute-row" hidden>Red ceiling <span id="absolute-unit">kWh/m²</span><input id="absolute-max" type="number" min="0.001" max="100000" step="0.1" value="8"></label>
+    <div class="legend" aria-label="Cold blue to sunny red"></div>
+    <div class="legend-labels"><span id="legend-low">0%</span><span id="legend-high">100%</span></div>
+    <p id="scale-explanation" class="note">Received / possible direct energy at the same surface orientation. Gray means no front-side solar potential.</p>
+    <label class="checkbox"><input id="show-heatmap" type="checkbox" checked disabled> Show accumulated heatmap</label>
+    <label for="heat-opacity">Heatmap opacity <output id="opacity-output">100%</output></label>
+    <input id="heat-opacity" type="range" min="0" max="1" step="0.01" value="1">
+    <div id="statistics" class="readout">Generate to see area-weighted results.</div>
+    <div class="small-actions"><button id="clear" disabled>Clear result</button><button id="export-report" disabled>Export report JSON</button></div>
+  </details>
+  <details>
+    <summary>Resolution &amp; engine settings</summary>
+    <div class="two-columns">
+      <label>Surface atlas <select id="atlas-size" data-bake-input><option value="512">512 × 512</option><option value="1024">1024 × 1024</option><option value="2048">2048 × 2048</option></select></label>
+      <label>Shadow map <select id="shadow-size" data-bake-input><option value="1024">1024 × 1024</option><option value="2048">2048 × 2048</option><option value="4096">4096 × 4096</option></select></label>
+    </div>
+    <label>Sun samples per GPU batch <select id="batch-size" data-bake-input><option>1</option><option>8</option><option selected>16</option><option>32</option><option>64</option></select></label>
+    <label for="dni">Constant direct-normal irradiance <output id="dni-output">1000 W/m²</output></label>
+    <input id="dni" data-bake-input type="range" min="100" max="1361" step="1" value="1000">
+    <p class="note">Idealized constant beam × incidence cosine × visible time. This is not weather-calibrated solar yield; diffuse sky and reflections are excluded.</p>
+    <label for="bias">Surface offset <output id="bias-output">0.020 m</output></label>
+    <input id="bias" data-bake-input type="range" min="0" max="0.2" step="0.001" value="0.02">
+    <p class="note">Lower for thin obstructions; increase only for self-shadow acne. Receiver-plane depth correction is already enabled. No PCF blur in the integration.</p>
+    <div class="small-actions"><button id="gpu-self-test" data-bake-input>Run GPU self-test</button></div><p id="gpu-test-result" class="note">An analytic four-point test for this device. No scene changes.</p>
+    <p id="engine-info" class="note">One reused shadow texture · f32 storage-buffer totals · GPU reductions · GPU-only color atlas.</p>
+  </details>
+  <details>
+    <summary>Preview sun &amp; camera</summary>
+    <label>Preview date · UTC <input id="preview-date" type="date" value="2026-06-21"></label>
+    <label for="preview-time">Preview time <output id="preview-time-output">16:00 UTC</output></label>
+    <input id="preview-time" type="range" min="0" max="1439" step="1" value="960">
+    <p id="sun-info" class="readout">—</p>
+    <p class="note">The sky and live shadows follow this preview. Changing it does not alter an accumulated heatmap.</p>
+    <div class="small-actions"><button id="reset-camera">Reset camera</button><button id="look-north">Look north</button></div>
+  </details>
+  <details id="manhattan-data">
+    <summary>Manhattan data &amp; attribution</summary>
+    <p class="note">The app tries NYC OTI’s public footprint service. If unavailable, the scene remains clearly labelled synthetic. Real footprints are extruded to roof heights, not photorealistic building assets.</p>
+    <div class="small-actions"><button id="load-nyc" data-bake-input>Load NYC footprints</button><button id="import-geojson" data-bake-input>Import GeoJSON</button></div>
+    <input id="geojson-file" type="file" accept=".json,.geojson,application/json" hidden>
+    <p id="data-status" class="note">No map tiles are used.</p>
+  </details>
+</aside>
+<section id="view-region" aria-label="Interactive 3D viewport">
+  <div id="scene-heading"><strong id="scene-name">Manhattan</strong><p id="scene-description"></p></div>
+  <div id="canvas-host"></div>
+  <div id="compass" aria-label="Camera-relative compass">
+    <div id="compass-rose"><b class="north">N</b><span class="east">E</span><span class="south">S</span><span class="west">W</span><div class="needle"></div></div>
+    <span id="heading">0°</span>
+  </div>
+  <div id="viewport-footer"><p id="data-source"></p><p id="interaction-hint">Drag to orbit · wheel/pinch to zoom · right-drag to pan</p></div>
+</section>
+</main>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

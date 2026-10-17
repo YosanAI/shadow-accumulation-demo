@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>WebGPU accumulator smoke test</title>
+<style>body{font:16px system-ui;margin:40px;background:white;color:black}pre{white-space:pre-wrap}button{padding:10px}</style>
+<h1>WebGPU accumulator smoke test</h1><p>This tests the raw engine without loading Three.js or any CDN. Serve the repository on localhost.</p>
+<button id="run">Run analytic GPU test</button><pre id="result">Not run.</pre>
+<script type="importmap">{"imports":{"#lab/":"../src/"}}</script>
+<script type="module">
+import {runGPUSelfTest} from '#lab/core/gpu-self-test.js';
+document.getElementById('run').onclick=async()=>{
+ const output=document.getElementById('result');let device;
+ try{
+  if(!navigator.gpu)throw new Error('WebGPU unavailable; use a supported browser on localhost or HTTPS.');
+  const adapter=await navigator.gpu.requestAdapter();if(!adapter)throw new Error('No adapter.');
+  device=await adapter.requestDevice();
+  output.textContent='Running…';const result=await runGPUSelfTest(device);output.textContent=result.message;
+ }catch(error){output.textContent='FAIL: '+error.message;console.error(error);}finally{device?.destroy();}
+};
+</script></html>

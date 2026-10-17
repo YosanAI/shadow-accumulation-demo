@@ -1,0 +1,110 @@
+
+> webgpu-shadow-accumulation-lab@1.0.0 test
+> node --test tests/*.test.js
+
+TAP version 13
+# Subtest: Vendored solar position matches the upstream SunCalc 1.9 reference values
+ok 1 - Vendored solar position matches the upstream SunCalc 1.9 reference values
+  ---
+  duration_ms: 1.150951
+  type: 'test'
+  ...
+# Subtest: World axes are east/up/south and azimuth is clockwise from true north
+ok 2 - World axes are east/up/south and azimuth is clockwise from true north
+  ---
+  duration_ms: 0.376406
+  type: 'test'
+  ...
+# Subtest: Inclusive dates cover a full non-leap year at exactly one-minute intervals
+ok 3 - Inclusive dates cover a full non-leap year at exactly one-minute intervals
+  ---
+  duration_ms: 0.741576
+  type: 'test'
+  ...
+# Subtest: Leap-year range contains 366 days and 527040 minute intervals
+ok 4 - Leap-year range contains 366 days and 527040 minute intervals
+  ---
+  duration_ms: 0.125245
+  type: 'test'
+  ...
+# Subtest: Bad ranges, dates, coordinates and intervals are rejected
+ok 5 - Bad ranges, dates, coordinates and intervals are rejected
+  ---
+  duration_ms: 0.564434
+  type: 'test'
+  ...
+# Subtest: Night is removed, midpoint times and DNI energy weights are retained
+ok 6 - Night is removed, midpoint times and DNI energy weights are retained
+  ---
+  duration_ms: 7.390853
+  type: 'test'
+  ...
+# Subtest: Partial last intervals use actual duration rather than a whole step
+ok 7 - Partial last intervals use actual duration rather than a whole step
+  ---
+  duration_ms: 2.461468
+  type: 'test'
+  ...
+# Subtest: Polar night produces an empty sample schedule without NaN
+ok 8 - Polar night produces an empty sample schedule without NaN
+  ---
+  duration_ms: 1.905696
+  type: 'test'
+  ...
+# Subtest: Long preparation is cancellable
+ok 9 - Long preparation is cancellable
+  ---
+  duration_ms: 1.781693
+  type: 'test'
+  ...
+# Subtest: Every scene-bound corner maps inside WebGPU clip depth [0,1]
+ok 10 - Every scene-bound corner maps inside WebGPU clip depth [0,1]
+  ---
+  duration_ms: 1.42757
+  type: 'test'
+  ...
+# Subtest: Light-frame receiver-plane slope agrees with moving within the same plane
+ok 11 - Light-frame receiver-plane slope agrees with moving within the same plane
+  ---
+  duration_ms: 0.23681
+  type: 'test'
+  ...
+# Subtest: Atlas is non-overlapping, in-bounds, upward-facing and preserves total area
+ok 12 - Atlas is non-overlapping, in-bounds, upward-facing and preserves total area
+  ---
+  duration_ms: 80.310953
+  type: 'test'
+  ...
+# Subtest: Atlas supports vertical façades, not just horizontal surfaces
+ok 13 - Atlas supports vertical façades, not just horizontal surfaces
+  ---
+  duration_ms: 38.654092
+  type: 'test'
+  ...
+# Subtest: Atlas rejects degenerate receivers and invalid sizes
+ok 14 - Atlas rejects degenerate receivers and invalid sizes
+  ---
+  duration_ms: 0.454081
+  type: 'test'
+  ...
+# Subtest: Relative potential, relative min-max and fixed absolute normalization differ correctly
+ok 15 - Relative potential, relative min-max and fixed absolute normalization differ correctly
+  ---
+  duration_ms: 0.230821
+  type: 'test'
+  ...
+# Subtest: Full-year minute preparation does not silently reduce time resolution
+ok 16 - Full-year minute preparation does not silently reduce time resolution
+  ---
+  duration_ms: 338.559609
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 542.847628
