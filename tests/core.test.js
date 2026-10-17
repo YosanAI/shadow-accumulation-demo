@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getPosition } from '#lab/vendor/suncalc-position.js';
+import SunCalc from 'suncalc';
 import { sunAt, buildSunSamples, validateSolarConfig } from '#lab/core/solar.js';
 import { createSurfaceAtlas } from '#lab/core/surface-atlas.js';
 import { makeLightFrame, transformPoint, boundsCorners, normalizeExposure, dot } from '#lab/core/math.js';
 const close=(actual,expected,tolerance=1e-6)=>assert.ok(Math.abs(actual-expected)<tolerance,`${actual} is not within ${tolerance} of ${expected}`);
 const config={latitude:40.751,longitude:-73.986,startDate:'2026-06-21',endDate:'2026-06-21',intervalMinutes:15,dni:1000};
 
-test('Vendored solar position matches the upstream SunCalc 1.9 reference values',()=>{
- const position=getPosition(new Date('2013-03-05T00:00:00Z'),50.5,30.5);
+test('SunCalc package matches the upstream 1.9 reference values',()=>{
+ const position=SunCalc.getPosition(new Date('2013-03-05T00:00:00Z'),50.5,30.5);
  close(position.azimuth,-2.5003175907168385,1e-10);close(position.altitude,-0.7000406838781611,1e-10);
 });
 test('World axes are east/up/south and azimuth is clockwise from true north',()=>{

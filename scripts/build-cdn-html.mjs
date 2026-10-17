@@ -1,4 +1,4 @@
-/** Build a single HTML without installing dependencies. Three.js stays on a pinned CDN. */
+/** Build a single HTML without installing dependencies. Pinned libraries stay on a CDN. */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,19 +17,20 @@ html=html.replace('<link rel="stylesheet" href="/src/ui/styles.css">',`<style>${
 const modules=JSON.stringify(await modulesIn(path.join(root,'src'))).replaceAll('<','\\u003c');
 const bootstrap=`<script type="application/json" id="module-sources">${modules}</script>
 <script>
-// Every application module is embedded; only pinned Three.js modules use the network.
+// Every application module is embedded; pinned Three.js and SunCalc use the network.
 const sources=JSON.parse(document.getElementById('module-sources').textContent);
 const imports={
   'three':'https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.webgpu.js',
   'three/webgpu':'https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.webgpu.js',
   'three/tsl':'https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.tsl.js',
-  'three/addons/':'https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/'
+  'three/addons/':'https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/',
+  'suncalc':'https://cdn.jsdelivr.net/npm/suncalc@1.9.0/+esm'
 };
 for(const [name,source] of Object.entries(sources))imports[name]=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
 const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports});document.head.append(map);
 import('#lab/main.js').catch(error=>{
   console.error(error);const banner=document.getElementById('fatal');banner.hidden=false;
-  document.getElementById('fatal-message').textContent='Unable to load the demo: '+error.message+'\\nThis single-HTML edition needs internet access to its pinned Three.js CDN. Serve it on localhost or HTTPS for WebGPU calculations. The Vite build can bundle Three.js for offline use.';
+  document.getElementById('fatal-message').textContent='Unable to load the demo: '+error.message+'\\nThis single-HTML edition needs internet access to its pinned dependencies on jsDelivr. Serve it on localhost or HTTPS for WebGPU calculations. The Vite build bundles the libraries for offline use.';
   document.getElementById('status').textContent='The demo could not initialize.';
 });
 </script>`;

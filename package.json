@@ -13,6 +13,6 @@
     "test": "node --test tests/*.test.js",
     "build:cdn": "node scripts/build-cdn-html.mjs"
   },
-  "dependencies": { "three": "0.186.1" },
+  "dependencies": { "suncalc": "1.9.0", "three": "0.186.1" },
   "devDependencies": { "vite": "7.1.7" }
 }

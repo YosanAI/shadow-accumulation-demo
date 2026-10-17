@@ -1,5 +1,22 @@
 # Verification record and target-device checklist
 
+## SunCalc package integration
+
+Solar positions now use the pinned `suncalc@1.9.0` npm package; the vendor
+directory was removed. A comparison against the previous implementation across
+1,280 positions found maximum differences below 8e-12 radians in altitude and
+6e-11 radians in azimuth. A clean `npm ci`, all 24 tests (including the full-year
+minute schedule), the Vite build, and the CDN HTML packager passed.
+
+Headless Chromium exercised preview-sun changes in development, the CDN HTML,
+and the production bundle. The CDN edition fetched the pinned SunCalc ES module
+and matched the upstream position reference; the production bundle rendered
+with every subrequest blocked. Chromium's native certificate store rejected the
+cloud proxy certificate, so CDN resources were fetched through a TLS-verifying
+Python HTTPS client for that browser check. Certificate verification stayed
+enabled. These checks exercise the solar adapter and WebGL preview, not WebGPU
+accumulation.
+
 ## Scene controls and fullscreen
 
 All 24 Node tests passed, including fullscreen entry, button exit, browser exit

@@ -1,10 +1,10 @@
-import { getPosition } from '#lab/vendor/suncalc-position.js';
+import SunCalc from 'suncalc';
 import { nextFrame, throwIfAborted } from '#lab/core/math.js';
 export const DAY_MS = 86400000;
 
 /** Right-handed scene coordinates: +X east, +Y up, -Z north. */
 export function sunAt(timestamp, latitude, longitude) {
-  const { altitude, azimuth } = getPosition(new Date(timestamp), latitude, longitude);
+  const { altitude, azimuth } = SunCalc.getPosition(new Date(timestamp), latitude, longitude);
   const horizontal = Math.cos(altitude);
   return {
     direction: [-Math.sin(azimuth) * horizontal, Math.sin(altitude), Math.cos(azimuth) * horizontal],

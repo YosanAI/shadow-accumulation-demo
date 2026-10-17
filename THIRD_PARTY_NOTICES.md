@@ -28,12 +28,12 @@ SOFTWARE.
 
 Source: https://github.com/mrdoob/three.js
 
-## SunCalc 1.9.0 solar-position subset — BSD-2-Clause
+## SunCalc 1.9.0 — BSD-2-Clause
 
-`src/vendor/suncalc-position.js` is the solar-position calculation from SunCalc
-1.9.0, reformatted and renamed for readability. Moon, twilight, and rise/set
-functions are not included. Original arithmetic and angular conventions are
-preserved and checked against the upstream numerical reference.
+The application uses the `suncalc` npm package, pinned to version 1.9.0, through
+its `getPosition` API. Vite bundles the package for offline use; the CDN-based
+HTML loads its pinned ES module from jsDelivr. The application preserves its
+angular conventions and checks the upstream numerical reference.
 
 Copyright (c) 2011-2015, Vladimir Agafonkin. All rights reserved.
 

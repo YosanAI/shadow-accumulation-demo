@@ -15,8 +15,8 @@ python3 -m http.server 3000
 Then open `http://localhost:3000/webgpu-shadow-lab.html`.
 Stop any other server on port 3000 before starting this standalone server.
 
-**This supplied single-HTML edition embeds all application code, CSS, and the
-SunCalc solar-position subset, but loads pinned Three.js 0.186.1 modules from
+**This supplied single-HTML edition embeds all application code and CSS,
+but loads pinned Three.js 0.186.1 and SunCalc 1.9.0 modules from
 jsDelivr. Internet is required for those modules.** It is not an offline bundle.
 Some browsers permit WebGPU on `file://`, but localhost is more predictable.
 Opening an HTML attachment inside a chat preview is not a WebGPU compatibility
@@ -162,8 +162,6 @@ src/
     viewer.js                   # WebGPURenderer scene, SkyMesh, compass, camera
     drag-controller.js
     styles.css
-  vendor/
-    suncalc-position.js         # Pinned, attributed SunCalc 1.9.0 solar subset
   main.js                       # UI/application orchestration only
 docs/
   ARCHITECTURE.md                # How the all-surface bake works; integration contract
@@ -175,8 +173,9 @@ See `docs/ARCHITECTURE.md` for the Manhattan/all-surfaces implementation report.
 ## Libraries
 
 Three.js 0.186.1 supplies rendering, geometry, node materials, OrbitControls, and
-SkyMesh. The SunCalc 1.9.0 solar-position subset is vendored and reformatted under
-BSD-2-Clause; no SunCalc runtime request is made. Vite 7.1.7 is a development-only
+SkyMesh. SunCalc 1.9.0 is an npm dependency under BSD-2-Clause and supplies solar
+positions through `getPosition`. Vite bundles it into the offline build; the
+CDN-based HTML loads its pinned ES module from jsDelivr. Vite 7.1.7 is a development-only
 server/bundler. No other runtime dependencies are used. Licenses and NYC data
 attribution are in `THIRD_PARTY_NOTICES.md`.
 
