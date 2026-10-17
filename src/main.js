@@ -382,7 +382,9 @@ async function initialize() {
     catch (error) {
         webgpuUnavailableReason = String(error.message ?? error);
     }
-    renderer = new THREE.WebGPURenderer({ ...(device ? { device } : { forceWebGL: true }), antialias: true, alpha: false });
+    // Resolve the millimeter-separated site surfaces even from the city overview.
+    // Ordinary perspective depth loses that separation at these camera distances.
+    renderer = new THREE.WebGPURenderer({ ...(device ? { device } : { forceWebGL: true }), antialias: true, alpha: false, logarithmicDepthBuffer: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;

@@ -1,5 +1,26 @@
 # Verification record and target-device checklist
 
+## Ground surface depth precision
+
+The renderer uses logarithmic depth to distinguish the closely spaced ground,
+driveway, road and sidewalk layers at overview distances. The model geometry and
+accumulation coordinates are unchanged. Headless Chromium with SwiftShader
+rendered all four scenes in WebGL preview mode, including repeated scene changes,
+zoom and orbit, without page errors. Manhattan and residential ground layers
+were inspected before and after the change.
+
+A rendered depth check placed a red sheet above a blue sheet at representative
+scene scales (210 m with a 31 mm gap; 1600 m with a 15 mm gap), using the viewer's
+46° field of view and 0.1–30000 m clipping range. In a central 576-pixel patch,
+ordinary perspective depth leaked 140 and 576 blue pixels respectively;
+logarithmic depth leaked none in either case. All 21 CPU tests, the Vite build,
+and the CDN packager passed. The raw WebGPU analytic self-test passed all 11
+checks on the software adapter; this is not a hardware performance measurement.
+Full WebGPU scene-switch validation remains blocked on this adapter by a
+`createBuffer` allocation failure for a 288-byte mapped buffer. The same failure
+was reproduced with logarithmic depth disabled, so the WebGL rendering checks
+above do not establish complete WebGPU scene validation.
+
 ## Compass geometry lifetime regression
 
 The current suite passes 19 tests, including three scene-resource regressions.
