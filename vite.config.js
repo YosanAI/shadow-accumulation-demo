@@ -27,6 +27,8 @@ function singleHTML() {
 }
 export default defineConfig({
   base:'./',
+  server:{port:3000,strictPort:true},
+  preview:{port:3000,strictPort:true},
   resolve:{alias:[{find:/^#lab\//,replacement:`${path.join(directory,'src')}/`}]},
   plugins:[singleHTML()],
   build:{target:'esnext',cssCodeSplit:false,assetsInlineLimit:Infinity,rollupOptions:{output:{inlineDynamicImports:true}}}

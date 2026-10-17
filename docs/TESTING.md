@@ -1,5 +1,24 @@
 # Verification record and target-device checklist
 
+## Scene controls and fullscreen
+
+All 24 Node tests passed, including fullscreen entry, button exit, browser exit
+events, unsupported browsers, and recovery after a rejected request. The Vite
+and standalone CDN HTML builds passed.
+
+Headless Chromium with SwiftShader rendered all four scenes in WebGL preview
+on port 3000. Keyboard scene selection, the centered switcher, 44-pixel controls,
+absence of the removed overlays and data controls, native fullscreen entry and
+exit, and renderer resizing were checked. Layouts at 1360, 390, and 320 pixels
+wide had no horizontal overflow or page errors. The production preview also ran
+on port 3000 and passed the 320-pixel fullscreen/resizing check. The application
+made no external requests while selecting the bundled scenes.
+
+Headless Escape did not trigger Chromium's browser exit action, so external
+fullscreen exit was exercised with the browser API instead. Interactive Escape
+remains in the manual checklist below. These UI checks use WebGL preview and do
+not expand the WebGPU validation described below.
+
 ## Ground surface depth precision
 
 The renderer uses logarithmic depth to distinguish the closely spaced ground,
@@ -68,7 +87,6 @@ The environment restricts browser navigation and external downloads. Therefore:
 - No Three.js/WebGPU scene has been rendered end to end here.
 - The WGSL pipelines have not been compiled/executed on a GPU here.
 - No GPU performance measurement or annual bake benchmark is reported.
-- No successful NYC live-data response was obtained or packaged.
 - `npm install` / the Vite offline bundling path was not executed.
 
 CPU test success is not a claim that GPU drivers, shader compilation, current
@@ -87,10 +105,11 @@ than hidden. It does not change the visible scene.
 The same test is available without Three.js or CDN dependencies:
 
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 3000
 ```
 
-Open `http://localhost:8000/tests/gpu-smoke.html`. This route needs a supported
+Stop any development or preview server on port 3000 before starting this
+standalone server. Open `http://localhost:3000/tests/gpu-smoke.html`. This route needs a supported
 WebGPU browser and secure origin, but no npm installation or internet. The engine
 self-test does not validate the Three.js ExternalTexture material or sky path.
 
@@ -123,9 +142,18 @@ self-test does not validate the Three.js ExternalTexture material or sky path.
 9. Try polar night, equatorial latitudes, a leap-year range, and a final partial
    interval (7 minutes over a day). Check that units and counts remain sensible.
 10. Verify that the bundled Midtown model stays visible after startup without an
-    automatic NYC request. Explicitly load/import footprints and confirm the source
-    badge changes. Disconnect the service and verify the current scene remains
-    available. Review missing-height counts and subset boundaries.
+    NYC data request. The former Manhattan data/download/import section and the
+    viewport's top and bottom information overlays should be absent. Confirm that
+    source metadata remains in the exported report and `THIRD_PARTY_NOTICES.md`
+    retains the data attribution.
+11. At desktop and phone widths, confirm that the scene switcher is centered,
+    its selected scene is clear, all four buttons work with a keyboard, and the
+    page has no horizontal overflow. Use the top-left viewport button to enter
+    fullscreen, then exit with the button and with Escape. Repeat entry and exit;
+    the canvas should fill the viewport, keep its correct aspect ratio, and retain
+    working camera controls and compass. Check the button's accessible name and
+    state after each transition, including a rejected or unsupported fullscreen
+    request. The controls should remain usable in a narrow mobile layout.
 
 Compare 60-, 15-, 5-, and 1-minute runs and independently increase shadow/atlas
 resolutions. Thin-obstruction errors are often spatial, not temporal. Check
@@ -134,10 +162,12 @@ estimate; the constant-DNI model and registered-area caveats still apply.
 
 ## Static UI layout check
 
-The HTML/CSS were rendered with application scripts disabled at 1360 × 900 and
+An earlier version of the HTML/CSS was rendered with application scripts disabled at 1360 × 900 and
 390 × 844. Both layouts had no horizontal page overflow; all four scene tabs and
-five configuration sections were present. This checks layout only: the viewport
-was intentionally empty and is not evidence of Three.js or WebGPU execution.
+five configuration sections were present, including the subsequently removed
+Manhattan data section. This checks that earlier layout only: the viewport was
+intentionally empty and is not evidence of Three.js or WebGPU execution. Use the
+manual checklist above to validate the current switcher and fullscreen layout.
 
 The supplied HTML's Blob/import-map loader was also exercised using its embedded
 solar module only: it returned a finite solar position and unit direction. All

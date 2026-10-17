@@ -220,7 +220,7 @@ CPU accumulation and color-image readback. No f16, subgroups, atomics, or
 experimental feature is required merely for novelty. Timestamp queries are
 feature-detected and report the last batch, not a complete application benchmark.
 
-## 7. Manhattan data provenance and optional footprint imports
+## 7. Bundled Manhattan model and data provenance
 
 The startup scene uses the supplied `manhattan-block-viewer.html` model data:
 573 buildings across 35 Midtown tax blocks, with 527 historical 2014 survey
@@ -236,26 +236,16 @@ architectural edge lines are retained. Roofs, façades and context surfaces rece
 the heatmap; buried base faces are excluded. Its 134,881 receiving triangles need
 a minimum 2048² atlas. The camera and sun use the application's existing viewer.
 
-Startup does not request or automatically replace the bundled scene. The
-explicit NYC download button requests up to 180 footprint features near latitude
-40.751, longitude −73.986. An imported WGS84 GeoJSON can contain up to 500
-processed features. The importer supports Polygon/MultiPolygon rings and holes.
+The application always uses the bundled Manhattan model. There is no live NYC
+download or GeoJSON import path. The source metadata remains available in
+`src/demos/manhattan-data.js` and exported reports; license and attribution
+requirements are retained in `THIRD_PARTY_NOTICES.md`.
 
-For those optional footprint imports, coordinates are projected into a local
-metre-scale tangent-plane approximation.
-The official `HEIGHT_ROOF` / `HEIGHTROOF` values are treated as feet and converted
-by 0.3048. Generic imported `height` is treated as metres. Missing heights become
-15 m and are counted prominently in source metadata. For quantitative use,
-verify the current service schema and height units against the source.
-
-The imported geometry is a footprint extrusion. Ground elevation is flattened; terraces,
-setbacks, actual roof slopes, detailed mechanical equipment, trees, and buildings
-outside the requested subset are not reconstructed. Boundary buildings can
-therefore receive too much sun. This is not a detailed Manhattan digital twin.
-
-A failed live request leaves the current scene available. The bundled model is
-independent of that service; the full embedded source provenance can be found in
-`src/demos/manhattan-data.js`.
+The centered scene switcher selects among the four scene factories. The viewport
+omits the former demo-description and source overlays. Its top-left fullscreen
+button expands the viewport, retaining the compass and exit control. A
+`ResizeObserver` on the canvas host updates the renderer size and camera aspect
+when the viewport changes size.
 
 Official source references:
 
@@ -277,7 +267,7 @@ rather than adding demo-specific conditions inside the core engine.
 ## 9. Validation and limitations
 
 The supplied Node numerical suite passed all 16 tests. The browser GPU path,
-Three.js render output, live service response, and npm/Vite build were not run
+Three.js render output and npm/Vite build were not run
 end to end in the restricted creation environment. The project includes an
 11-assertion analytic GPU self-test so those raw GPU stages can be checked on a
 supported target browser. See `TESTING.md` for its exact scope and remaining

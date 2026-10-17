@@ -6,18 +6,17 @@ import { buildSunSamples, validateSolarConfig } from '#lab/core/solar.js';
 import { snapshotSurfaces } from '#lab/adapters/three-surfaces.js';
 import { HeatmapLayer } from '#lab/adapters/heatmap-layer.js';
 import { Viewer } from '#lab/ui/viewer.js';
-import { createManhattan, fetchNYCBuildings, createManhattanFromGeoJSON } from '#lab/demos/manhattan.js';
+import { setupFullscreen } from '#lab/ui/fullscreen.js';
+import { createManhattan } from '#lab/demos/manhattan.js';
 import { createResidential } from '#lab/demos/residential.js';
 import { createTerrain } from '#lab/demos/terrain.js';
 import { createSolarPanels } from '#lab/demos/solar-panels.js';
 const element = id => document.getElementById(id);
 const number = id => Number(element(id).value);
-const sceneNames = { manhattan: 'Manhattan', residential: 'Residential roofs', terrain: 'Mountain terrain', panels: 'Concentric solar panels' };
 const factories = { manhattan: createManhattan, residential: createResidential, terrain: createTerrain, panels: createSolarPanels };
 let device, renderer, viewer, demo, engine, snapshot, heatmap;
 let webgpuUnavailableReason = '';
 let controller = null, running = null, lastStats = null, report = null, resultState = 'empty';
-let nycData = null, loadingNYC = false, sceneVersion = 0;
 function showError(message) {
     element('fatal-message').textContent = message;
     element('fatal').hidden = false;
@@ -134,19 +133,10 @@ function switchScene(id) {
     if (running)
         return;
     clearResult();
-    const next = id === 'manhattan' && nycData ? createManhattanFromGeoJSON(nycData) : factories[id]();
-    demo = next;
-    sceneVersion++;
+    demo = factories[id]();
     viewer.setDemo(demo);
     for (const button of document.querySelectorAll('[data-scene]'))
         button.setAttribute('aria-pressed', String(button.dataset.scene === id));
-    element('scene-name').textContent = sceneNames[id];
-    element('scene-description').textContent = demo.description;
-    element('data-source').textContent = demo.source.description;
-    element('manhattan-data').hidden = id !== 'manhattan';
-    element('interaction-hint').textContent = `Drag to orbit · wheel/pinch to zoom · right-drag to pan${demo.draggables.length ? ' · drag ringed objects to move them' : ''}`;
-    if (id === 'manhattan' && demo.source.kind === 'nyc')
-        element('atlas-size').value = '1024';
     const minAtlasSize = demo.minAtlasSize ?? 512;
     for (const option of element('atlas-size').options)
         option.disabled = Number(option.value) < minAtlasSize;
@@ -241,31 +231,6 @@ async function generate() {
     running = null;
     setBusy(false);
 }
-async function loadNYC() {
-    if (loadingNYC || running)
-        return;
-    loadingNYC = true;
-    const version = sceneVersion;
-    element('data-status').textContent = 'Requesting real footprint polygons and roof heights from NYC OTI…';
-    const abort = new AbortController(), timeout = setTimeout(() => abort.abort(), 12000);
-    try {
-        const data = await fetchNYCBuildings({ signal: abort.signal });
-        // Validate the import before storing it. Replacement only happens on request,
-        // never midway through a bake or after the user changed to another scene.
-        nycData = data;
-        if (!running && demo.id === 'manhattan' && sceneVersion === version)
-            switchScene('manhattan');
-        element('data-status').textContent = 'NYC data loaded. Footprints are real; roofs are height extrusions. The subset is capped by the service query.';
-    }
-    catch (error) {
-        nycData = null;
-        element('data-status').textContent = `Live data unavailable (${error.name === 'AbortError' ? 'request timed out' : error.message}). The current scene remains available. You can also import a downloaded NYC GeoJSON.`;
-    }
-    finally {
-        clearTimeout(timeout);
-        loadingNYC = false;
-    }
-}
 function exportReport() {
     if (!report)
         return;
@@ -278,6 +243,7 @@ function exportReport() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 function wireUI() {
+    setupFullscreen(element('view-region'), element('fullscreen-toggle'));
     element('generate').addEventListener('click', generate);
     element('gpu-self-test').addEventListener('click', async () => {
         if (running || !device)
@@ -343,26 +309,6 @@ function wireUI() {
             estimate();
             invalidate();
         });
-    element('load-nyc').addEventListener('click', loadNYC);
-    element('import-geojson').addEventListener('click', () => element('geojson-file').click());
-    element('geojson-file').addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file || running)
-            return;
-        try {
-            if (file.size > 25 * 1024 * 1024)
-                throw new Error('Use a GeoJSON subset under 25 MB.');
-            const data = JSON.parse(await file.text());
-            nycData = data;
-            switchScene('manhattan');
-            element('data-status').textContent = `Imported ${file.name}. Verify its height units in the report.`;
-        }
-        catch (error) {
-            element('data-status').textContent = error.message;
-            nycData = null;
-        }
-        event.target.value = '';
-    });
 }
 async function initialize() {
     wireUI();

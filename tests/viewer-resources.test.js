@@ -55,7 +55,7 @@ test('Replacing a scene leaves Three.js shared sprite and arrow geometry intact'
     const viewer = viewerFixture();
     try {
         viewer.setDemo(demo());
-        viewer.setDemo(demo()); // Same path as the automatic NYC scene replacement.
+        viewer.setDemo(demo()); // Same cleanup path as repeated scene selection.
         assert.equal(sharedDisposals, 0, 'Scene cleanup must not dispose Three.js singleton geometry');
     } finally {
         disposeObject(viewer.guides);

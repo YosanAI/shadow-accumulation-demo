@@ -9,10 +9,11 @@ not a weather-calibrated irradiance or photovoltaic-production application.
 Open `webgpu-shadow-lab.html` from a local HTTP server in a WebGPU-capable browser:
 
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 3000
 ```
 
-Then open `http://localhost:8000/webgpu-shadow-lab.html`.
+Then open `http://localhost:3000/webgpu-shadow-lab.html`.
+Stop any other server on port 3000 before starting this standalone server.
 
 **This supplied single-HTML edition embeds all application code, CSS, and the
 SunCalc solar-position subset, but loads pinned Three.js 0.186.1 modules from
@@ -28,9 +29,7 @@ this preview mode; there is no WebGL computation fallback.
 
 The initial Manhattan scene is the locally bundled model supplied in
 `manhattan-block-viewer.html`: 573 buildings across 35 Midtown tax blocks,
-including 527 historical survey meshes. It loads without a data request and is
-not automatically replaced. The NYC footprint download and GeoJSON import
-buttons remain available for explicitly selecting a different dataset.
+including 527 historical survey meshes. It loads without a data request.
 
 Start with the default one-day, 15-minute bake. Expand **Resolution & engine
 settings → Run GPU self-test** to run an analytic device-side check before a
@@ -45,18 +44,21 @@ npm install
 npm run dev
 ```
 
-Vite prints its local URL. No UI framework is used. To make a single HTML with
-Three.js actually bundled for offline use:
+The development server runs at `http://localhost:3000`. No UI framework is used.
+To make a single HTML with Three.js actually bundled for offline use, stop the
+development server and run:
 
 ```bash
 npm run build
 npm run preview
 ```
 
+The preview server also uses `http://localhost:3000`. Both servers require that
+port to be available rather than silently selecting another one.
+
 `dist/index.html` is postprocessed to inline Vite's JavaScript and CSS. The build
 keeps intermediate assets for inspection; the HTML itself is intended to be
-self-contained. The bundled scenes do not require a data request. The optional
-live NYC footprint download still requires a network.
+self-contained. The bundled scenes do not require a data request.
 
 To rebuild the supplied CDN-based HTML without installing anything:
 
@@ -68,7 +70,7 @@ npm run build:cdn
 
 | Tab | Geometry | Heatmap receivers | Interaction |
 |---|---|---|---|
-| Manhattan | Supplied Midtown model: 573 buildings, historical survey roof details, streets, sidewalks, Bryant Park and plazas; minimum 2048² atlas | Building roofs and façades, streets, sidewalks and ground; buried bases excluded | Orbit, pan, zoom; optionally replace with downloaded/imported footprints |
+| Manhattan | Supplied Midtown model: 573 buildings, historical survey roof details, streets, sidewalks, Bryant Park and plazas; minimum 2048² atlas | Building roofs and façades, streets, sidewalks and ground; buried bases excluded | Orbit, pan, zoom |
 | Residential | Supplied residential-area model: 18 houses with hip and gable roofs, curved streets, driveways, roof equipment, 24 trees | Roof slopes only | Drag subtly ringed trees |
 | Terrain | Procedural mountain/valley heightfield, 128 × 128 cells (32,768 triangles); minimum 1024² surface atlas selected automatically | Entire terrain surface | Orbit to inspect self-shadowed valleys |
 | Solar panels | 66 fixed panels in three concentric rings, varying azimuths | Front faces only | Drag two trees, a block, a cylinder, a wall, and a cone |
@@ -76,6 +78,13 @@ npm run build:cdn
 Every scene registers receivers and casters independently. A non-receiving
 chimney, tree, panel frame, or wall still casts a shadow on receiving surfaces.
 The procedural trees are opaque geometric canopies, not transmissive foliage.
+
+Use the centered scene switcher to change demos. The button at the viewport's
+top-left corner expands the scene to fullscreen in supported browsers; press it
+again or press Escape to exit. The viewport has no demo-description or source
+information overlays. Manhattan uses the bundled model; dataset download and
+GeoJSON import controls are not included. Source metadata remains in the bundled
+data and exported reports, with attribution in `THIRD_PARTY_NOTICES.md`.
 
 ## What the controls mean
 
@@ -177,13 +186,15 @@ azimuth. Do not replace it with a different major API without updating tests.
 
 ## Verification status
 
-`npm test`: **16 passing CPU/numerical tests**, including the upstream SunCalc
+`npm test`: **24 passing tests**, including the upstream SunCalc
 reference, coordinate conversion, leap years, a complete one-minute annual sun
-schedule, clipping, receiver-plane depth correction, atlas packing, and metrics.
-JavaScript syntax checks and the dependency-free single-HTML packager passed.
+schedule, clipping, receiver-plane depth correction, atlas packing, metrics,
+scene-resource lifetime, and fullscreen state changes and failures. The Vite
+build and dependency-free single-HTML packager passed.
 
-Browser navigation/network access is restricted in the creation environment.
-The full Three.js/WebGPU renderer, raw GPU shaders, live NYC response, and npm/Vite
-bundle were **not executed end to end here**. Do not interpret CPU tests as GPU
-validation or a performance benchmark. The included analytic GPU self-test is
-provided for a supported browser on your device; see `docs/TESTING.md`.
+Headless Chromium exercised all four scenes in WebGL preview, keyboard scene
+selection, fullscreen entry/exit, and desktop/phone layouts. The production
+preview was also checked on port 3000. Full WebGPU scene validation remains
+limited by a software-adapter allocation error; CPU and WebGL checks do not
+establish GPU correctness or performance. See `docs/TESTING.md` for the executed
+checks and the analytic GPU self-test for a supported device.
