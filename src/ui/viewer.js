@@ -19,7 +19,11 @@ function label(text) {
     context.fillText(text, 64, 66);
     const map = new THREE.CanvasTexture(canvas);
     map.colorSpace = THREE.SRGBColorSpace;
-    return new THREE.Sprite(new THREE.SpriteMaterial({ map, depthTest: false, toneMapped: false }));
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map, depthTest: false, toneMapped: false }));
+    // Sprite's default interleaved geometry is shared internally by Three.js.
+    // Scene cleanup must only dispose a copy owned by this label.
+    sprite.geometry = sprite.geometry.clone();
+    return sprite;
 }
 export class Viewer {
     constructor(renderer, host, onChanged, onError) {
@@ -112,8 +116,13 @@ export class Viewer {
             this.guides.add(sprite);
         }
         const corner = new THREE.Vector3(demo.target[0] - demo.extent * 0.38, 0.15, demo.target[2] + demo.extent * 0.38);
-        this.guides.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, -1), corner, demo.extent * 0.12, 0x354651, demo.extent * 0.025, demo.extent * 0.014));
-        this.guides.add(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), corner, demo.extent * 0.12, 0x354651, demo.extent * 0.025, demo.extent * 0.014));
+        for (const direction of [[0, 0, -1], [1, 0, 0]]) {
+            const arrow = new THREE.ArrowHelper(new THREE.Vector3(...direction), corner, demo.extent * 0.12, 0x354651, demo.extent * 0.025, demo.extent * 0.014);
+            // ArrowHelper also shares its default geometries between instances.
+            arrow.line.geometry = arrow.line.geometry.clone();
+            arrow.cone.geometry = arrow.cone.geometry.clone();
+            this.guides.add(arrow);
+        }
         this.scene.add(this.guides);
     }
     setSun(timestamp, latitude, longitude) {

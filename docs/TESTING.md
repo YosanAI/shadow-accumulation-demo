@@ -1,5 +1,15 @@
 # Verification record and target-device checklist
 
+## Compass geometry lifetime regression
+
+The current suite passes 19 tests, including three scene-resource regressions.
+Before the fix, scene replacement disposed Three.js's internal sprite/arrow
+geometry, and replacement labels reused a destroyed vertex buffer. The regression
+uses the pinned renderer's actual attribute cache with simulated GPU buffers; it
+does not need a WebGPU-capable machine. It also verifies that repeated scene
+changes release each old guide resource once without disposing live resources.
+Compass helpers now own their geometry copies. Vite and CDN builds passed.
+
 ## WebGL preview fallback verification
 
 Headless Chrome rendered all four scenes with WebGPU unavailable. The WebGL 2
