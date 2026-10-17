@@ -11,7 +11,7 @@ export class AccumulationEngine {
     this.device = device;
     this.resources = [];
     this.ready = false;
-    this.display = { metric: 'energy', normalization: 'access', absoluteMax: 8 };
+    this.display = { metric: 'energy', normalization: 'range', absoluteMax: 8 };
     this.completedSamples = 0;
   }
 
